@@ -86,5 +86,8 @@ page_title('My Profile', home_path(), 'Back to Dashboard', 'Manage your account 
       <button class="btn btn-primary">Update password</button>
     </form>
   </div></div>
+  <div class="card mt-3"><div class="card-head"><h2>Sign out</h2></div><div class="card-body">
+    <form method="post" action="<?= h(app_url('logout.php')) ?>"><?= csrf_field() ?><button class="btn btn-ghost" type="submit"><?= icon('logout', 16) ?> Logout</button></form>
+  </div></div>
 </div>
 <?php page_footer();

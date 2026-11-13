@@ -54,7 +54,7 @@ if (isset($_GET['share'])) {
 $path = __DIR__ . '/uploads/' . basename($stored);
 if (!is_file($path)) {
     http_response_code(404);
-    exit('Stored file not found.');
+    exit('This file is no longer available on the server. Please contact the administrator.');
 }
 $count($conn);
 log_activity($conn, $uid, $action, $target, 'Downloaded "' . $original . '"');

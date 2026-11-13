@@ -36,9 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     db_query($conn, 'INSERT INTO document_attachments(document_id, uploaded_by, original_filename, stored_filename, file_type, file_size) VALUES (?,?,?,?,?,?)',
         'iisssi', [$id, $uid, $res['original'], $res['stored'], $res['mime'], $res['size']])->close();
+    db_query($conn, 'UPDATE documents SET needs_more = 0 WHERE document_id = ?', 'i', [$id])->close();   // request answered: banner and bell clear
     log_activity($conn, $uid, 'Add Attachment', 'DOC-' . $id, 'Added "' . $res['original'] . '" as an additional file');
-    flash_set('success', 'Additional file added. The reviewer will check it.');
-    redirect('add_file.php?id=' . (int)$id);
+    flash_set('success', 'Additional file added. The document is back with the reviewer.');
+    redirect(home_path());
 }
 
 $last  = db_one($conn, 'SELECT comment FROM verification_records WHERE document_id = ? ORDER BY verification_id DESC LIMIT 1', 'i', [$id]);

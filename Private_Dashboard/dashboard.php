@@ -12,7 +12,8 @@ $totalDocs  = array_sum($counts);
 $totalUsers = (int)db_one($conn, 'SELECT COUNT(*) c FROM users')['c'];
 $logs = db_all($conn, 'SELECT l.action_type, l.target_id, l.description, l.created_at, u.full_name
                          FROM activity_logs l LEFT JOIN users u ON l.user_id = u.user_id ORDER BY l.log_id DESC LIMIT 6');
-$queue = db_all($conn, "SELECT d.document_id, COALESCE(NULLIF(d.title,''), d.original_filename) AS name, d.category, d.needs_more, u.full_name
+$queue = db_all($conn, "SELECT d.document_id, COALESCE(NULLIF(d.title,''), d.original_filename) AS name, d.category, d.needs_more, u.full_name,
+                                (SELECT COUNT(*) FROM document_attachments a WHERE a.document_id = d.document_id) AS extra_files
                           FROM documents d JOIN users u ON d.uploaded_by = u.user_id
                          WHERE d.document_status = 'Pending' ORDER BY d.uploaded_at ASC LIMIT 5");
 
@@ -45,7 +46,7 @@ $cards = [
     <div class="table-responsive"><table class="tbl"><thead><tr><th>ID</th><th>Document</th><th>Uploaded by</th><th></th></tr></thead><tbody>
     <?php foreach ($queue as $r): ?>
       <tr><td class="text-nowrap">#DOC-<?= (int)$r['document_id'] ?></td>
-          <td><?= h($r['name']) ?><?= (int)$r['needs_more'] === 1 ? '<br><small class="text-warning">Awaiting additional files</small>' : '' ?></td>
+          <td><?= h($r['name']) ?><?= (int)$r['needs_more'] === 1 ? '<br><small class="text-warning">Awaiting additional files</small>' : ((int)$r['extra_files'] > 0 ? '<br><small class="text-success">Files added &ndash; review</small>' : '') ?></td>
           <td><?= h($r['full_name']) ?></td>
           <td class="text-right"><a class="btn btn-sm btn-primary" href="verify_documents.php?status=Pending&amp;id=<?= (int)$r['document_id'] ?>">Review</a></td></tr>
     <?php endforeach; if (!$queue): ?><tr><td colspan="4" class="empty">Nothing is waiting for review.</td></tr><?php endif; ?>

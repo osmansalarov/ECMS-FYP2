@@ -8,7 +8,9 @@ Universiti Tenaga Nasional (UNITEN) · Final Year Project 2 · Osman Salarov (CS
 ## Features
 **Administrator:** dashboard overview, user management (create, reset password, enable/disable, unlock), *Review Submitted Documents* (Approve, Reject, Keep Pending with a request for additional files, CSV export), Send Documents to employees, Activity Logs (quick filters, plain-language entries, CSV export, peak activity / security alerts / storage), profile.
 
-**Employee:** dashboard with document status, Upload Course Document (title, category, drag and drop), add additional files when requested, Inbox for documents sent by the administrator, profile (edit name/e-mail, change password).
+**Employee:** dashboard with document status, Upload Course Document (title, category, drag and drop), add additional files when requested (the request clears as soon as a file is added), Inbox for received documents, profile with logout (edit name/e-mail, change password).
+
+**Sending:** an administrator can send a document to all employees, or to selected people (employees and administrators) chosen from a searchable list or typed by name/e-mail. Every recipient has an Inbox.
 
 ## Security controls
 Password hashing (bcrypt) · parameterised SQL · RBAC with audit log on violations · HttpOnly/SameSite sessions · 15-minute idle timeout · login lockout (5 failures, 15 min) with admin unlock · CSRF tokens · upload validation (extension, MIME, signature, structure, 5 MB) · random stored file names, `uploads/` denied by Apache, downloads only through permission-checked PHP · output encoding and CSP headers · CSV formula-injection protection.

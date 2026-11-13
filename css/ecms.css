@@ -124,3 +124,8 @@ a.stat:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(18,51,107,.1
 .table-responsive{overflow-x:auto}
 .scroll-top{overflow-x:auto;overflow-y:hidden;height:14px;margin:0 0 2px}
 .avatar{cursor:default}
+
+/* v7: bottom menu group (My Profile, Support) set apart */
+.menu.bottom{background:#eef2f9;border:1px solid var(--line);border-radius:10px;padding:6px;margin-top:auto}
+.recip-list{max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:#fff}
+.recip-list label{display:flex;gap:8px;align-items:center;margin:0;padding:6px 0;border-bottom:1px solid #edf1f7;cursor:pointer}

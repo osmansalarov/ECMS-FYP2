@@ -104,7 +104,7 @@ page_title('Review Submitted Documents', 'Private_Dashboard/dashboard.php', 'Bac
       <td><b><?= h($d['full_name']) ?></b><br><small><?= h($d['email']) ?></small></td>
       <td><a href="<?= $href ?>"><?= h($d['title'] ?: $d['original_filename']) ?></a><br><small><?= h($d['category'] ?: $d['original_filename']) ?><?= (int)$d['extra_files'] > 0 ? ' &middot; +' . (int)$d['extra_files'] . ' file(s)' : '' ?></small></td>
       <td class="text-nowrap"><small><?= h(date('d M Y', strtotime((string)$d['uploaded_at']))) ?></small></td>
-      <td><?= status_badge($d['document_status']) ?><?= (int)$d['needs_more'] === 1 ? '<br><small class="text-warning">More files requested</small>' : '' ?></td></tr>
+      <td><?= status_badge($d['document_status']) ?><?= (int)$d['needs_more'] === 1 ? '<br><small class="text-warning">More files requested</small>' : ((int)$d['extra_files'] > 0 && $d['document_status'] === 'Pending' ? '<br><small class="text-success">Files added &ndash; review</small>' : '') ?></td></tr>
   <?php endforeach; if (!$docs): ?><tr><td colspan="5" class="empty">No documents in this view.</td></tr><?php endif; ?>
   </tbody></table></div></div>
 

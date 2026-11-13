@@ -54,9 +54,9 @@ function start_secure_session(): void
 start_secure_session();
 
 require_once __DIR__ . '/include/migrate.php';
-if (empty($_SESSION['schema_v3'])) {
+if (empty($_SESSION['schema_v4'])) {
     ecms_migrate($conn);          // idempotent FYP2 schema upgrade, once per session
-    $_SESSION['schema_v3'] = 1;
+    $_SESSION['schema_v4'] = 1;
 }
 
 /** URL path of the application root, e.g. /ECMS_Prototype_FileManagement/ */
@@ -397,8 +397,10 @@ function icon(string $name, int $size = 20): string
 /** Standard "Back" button. $path is relative to the app root. */
 function back_button(string $path = '', string $label = 'Back'): string
 {
+    // Always "Back": returns to the previous page when the browser came from this site, otherwise to $path (default: own dashboard).
     $path = $path !== '' ? $path : home_path();
-    return '<a class="btn btn-back btn-sm" href="' . h(app_url($path)) . '">&larr; ' . h($label) . '</a>';
+    $js = "var r=document.referrer;if(r&&r.indexOf(location.origin)===0&&r!==location.href){history.back();return false;}";
+    return '<a class="btn btn-back btn-sm" href="' . h(app_url($path)) . '" onclick="' . h($js) . '">&larr; Back</a>';
 }
 
 /** Page title block: breadcrumb, title, optional subtitle, optional Back button and extra action HTML. */
@@ -418,7 +420,7 @@ function bell_count(mysqli $c): int
 {
     $uid = (int)($_SESSION['user_id'] ?? 0);
     if (is_admin()) {
-        return (int)(db_one($c, "SELECT COUNT(*) n FROM documents WHERE document_status = 'Pending'")['n'] ?? 0);
+        return (int)(db_one($c, "SELECT COUNT(*) n FROM documents WHERE document_status = 'Pending' AND needs_more = 0")['n'] ?? 0);
     }
     $unread = (int)(db_one($c, 'SELECT COUNT(*) n FROM shared_recipients WHERE user_id = ? AND read_at IS NULL', 'i', [$uid])['n'] ?? 0);
     $needs  = (int)(db_one($c, "SELECT COUNT(*) n FROM documents WHERE uploaded_by = ? AND needs_more = 1 AND document_status = 'Pending'", 'i', [$uid])['n'] ?? 0);
@@ -431,18 +433,18 @@ function page_header(string $title): void
     $admin   = is_admin();
     $current = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''));
     $name    = (string)($_SESSION['full_name'] ?? '');
-    $unread  = $admin ? 0 : (int)(db_one($conn, 'SELECT COUNT(*) n FROM shared_recipients WHERE user_id = ? AND read_at IS NULL', 'i', [(int)$_SESSION['user_id']])['n'] ?? 0);
+    $unread  = (int)(db_one($conn, 'SELECT COUNT(*) n FROM shared_recipients WHERE user_id = ? AND read_at IS NULL', 'i', [(int)$_SESSION['user_id']])['n'] ?? 0);
     $menu = $admin
-        ? [['Private_Dashboard/dashboard.php', 'Dashboard', 'grid', 0], ['Private_Dashboard/users.php', 'User Management', 'users', 0],
-           ['Private_Dashboard/send_documents.php', 'Send Documents', 'send', 0], ['Private_Dashboard/verify_documents.php', 'Verification', 'shield', 0],
-           ['Private_Dashboard/activity_logs.php', 'Activity Logs', 'list', 0], ['profile.php', 'My Profile', 'user', 0]]
+        ? [['Private_Dashboard/dashboard.php', 'Dashboard', 'grid', 0], ['Private_Dashboard/verify_documents.php', 'Verification', 'shield', 0],
+           ['Private_Dashboard/send_documents.php', 'Send Documents', 'send', 0], ['private_user/inbox.php', 'Inbox', 'inbox', $unread],
+           ['Private_Dashboard/users.php', 'User Management', 'users', 0], ['Private_Dashboard/activity_logs.php', 'Activity Logs', 'list', 0]]
         : [['private_user/home.php', 'Dashboard', 'grid', 0], ['upload.php', 'Upload Document', 'upload', 0],
-           ['private_user/inbox.php', 'Inbox', 'inbox', $unread], ['profile.php', 'My Profile', 'user', 0]];
+           ['private_user/inbox.php', 'Inbox', 'inbox', $unread]];
     $bell     = bell_count($conn);
-    $bellHref = $admin ? 'Private_Dashboard/verify_documents.php' : 'private_user/inbox.php';
+    $bellHref = $admin ? 'Private_Dashboard/verify_documents.php?status=Pending' : 'private_user/home.php';
     echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
        . '<title>' . h($title) . ' | ECMS</title><link rel="stylesheet" href="' . h(app_url('css/bootstrap.min.css')) . '">'
-       . '<link rel="stylesheet" href="' . h(app_url('css/ecms.css')) . '?v=6"></head><body class="ecms">'
+       . '<link rel="stylesheet" href="' . h(app_url('css/ecms.css')) . '?v=7"></head><body class="ecms">'
        . '<header class="topbar"><a class="brand" href="' . h(app_url(home_path())) . '"><span class="logo-box"><img src="' . h(app_url('css/uniten_logo.jpg')) . '" alt="UNITEN"></span>'
        . '<span class="brand-text">ECMS Academic Portal</span></a><div class="top-actions">'
        . '<a class="icon-btn" href="' . h(app_url($bellHref)) . '" title="' . ($admin ? 'Documents awaiting review' : 'Notifications') . '">' . icon('bell')
@@ -455,8 +457,8 @@ function page_header(string $title): void
         echo '<a class="' . ($active ? 'active' : '') . '" href="' . h(app_url($path)) . '">' . icon($ico) . '<span>' . h($label) . '</span>'
            . ($badge > 0 ? '<em class="count">' . (int)$badge . '</em>' : '') . '</a>';
     }
-    echo '</nav><div class="menu bottom"><a class="' . ($current === 'support.php' ? 'active' : '') . '" href="' . h(app_url('support.php')) . '">' . icon('help') . '<span>Support</span></a>'
-       . '<form method="post" action="' . h(app_url('logout.php')) . '">' . csrf_field() . '<button type="submit">' . icon('logout') . '<span>Logout</span></button></form></div></aside>'
+    echo '</nav><div class="menu bottom"><a class="' . ($current === 'profile.php' ? 'active' : '') . '" href="' . h(app_url('profile.php')) . '">' . icon('user') . '<span>My Profile</span></a>'
+       . '<a class="' . ($current === 'support.php' ? 'active' : '') . '" href="' . h(app_url('support.php')) . '">' . icon('help') . '<span>Support</span></a></div></aside>'
        . '<main class="content">' . flash_render();
 }
 

@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-/** Employee Inbox: documents sent by administrators. */
+/** Inbox: documents sent by administrators (visible to every recipient, employee or administrator). */
 require_once __DIR__ . '/../common.php';
-require_login('Employee');
+require_login();   // Employees and administrators can both receive documents
 
 $uid = (int)$_SESSION['user_id'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,7 +23,7 @@ if ($unread > 0): ?>
 $actions = (string)ob_get_clean();
 
 page_header('Inbox');
-page_title('Inbox', home_path(), 'Back to Dashboard', 'Documents sent to you by the administrators. Unread: ' . $unread . '.', $actions);
+page_title('Inbox', home_path(), 'Back to Dashboard', 'Documents sent to you. Unread: ' . $unread . '.', $actions);
 ?>
 <div class="card"><div class="table-responsive"><table class="tbl"><thead><tr><th>Document</th><th>From</th><th>Date</th><th class="text-right">Action</th></tr></thead><tbody>
 <?php foreach ($items as $i): ?>

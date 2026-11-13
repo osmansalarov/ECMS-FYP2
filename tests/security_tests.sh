@@ -95,8 +95,8 @@ VT=$(page "$T/adm" "Private_Dashboard/verify_documents.php?status=Pending&id=$DO
 curl -s -b "$T/adm" -c "$T/adm" -L -d "csrf=$VT&document_id=$DOC&decision=Pending" --data-urlencode "comment=Please add the signed outline" "$BASE/Private_Dashboard/verify_documents.php?status=Pending&id=$DOC" | grep -q "stays Pending" && ok "Keep Pending with a request note works" || no "keep pending"
 page "$T/emp" private_user/home.php | grep -q "Additional documents required" && ok "employee is notified on the dashboard" || no "employee notification"
 AF=$(page "$T/emp" "add_file.php?id=$DOC" | tokfrom)
-curl -s -b "$T/emp" -c "$T/emp" -L -F "csrf=$AF" -F "myfile=@$T/ok.pdf" "$BASE/add_file.php?id=$DOC" | grep -q "Additional file added" && ok "employee adds an additional file" || no "add additional file"
 curl -s -b "$T/emp" -c "$T/emp" -L -F "csrf=$AF" -F "myfile=@$T/evil.pdf" "$BASE/add_file.php?id=$DOC" | grep -qi "does not match\|signature" && ok "additional file is validated like any upload" || no "attachment validation"
+curl -s -b "$T/emp" -c "$T/emp" -L -F "csrf=$AF" -F "myfile=@$T/ok.pdf" "$BASE/add_file.php?id=$DOC" | grep -q "Additional file added" && ok "employee adds an additional file" || no "add additional file"
 VT=$(page "$T/adm" "Private_Dashboard/verify_documents.php?status=Pending&id=$DOC" | tokfrom)
 curl -s -b "$T/adm" -c "$T/adm" -L -d "csrf=$VT&document_id=$DOC&decision=Complete" "$BASE/Private_Dashboard/verify_documents.php?status=Pending&id=$DOC" | grep -q "marked as Complete" && ok "admin approves; request is closed" || no "approve"
 page "$T/emp" "add_file.php?id=$DOC" | grep -qi "No additional documents are requested" && ok "add-file page closes after the decision" || no "request closed"
