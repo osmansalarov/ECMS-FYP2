@@ -442,7 +442,7 @@ function page_header(string $title): void
     $bellHref = $admin ? 'Private_Dashboard/verify_documents.php' : 'private_user/inbox.php';
     echo '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
        . '<title>' . h($title) . ' | ECMS</title><link rel="stylesheet" href="' . h(app_url('css/bootstrap.min.css')) . '">'
-       . '<link rel="stylesheet" href="' . h(app_url('css/ecms.css')) . '?v=5"></head><body class="ecms">'
+       . '<link rel="stylesheet" href="' . h(app_url('css/ecms.css')) . '?v=6"></head><body class="ecms">'
        . '<header class="topbar"><a class="brand" href="' . h(app_url(home_path())) . '"><span class="logo-box"><img src="' . h(app_url('css/uniten_logo.jpg')) . '" alt="UNITEN"></span>'
        . '<span class="brand-text">ECMS Academic Portal</span></a><div class="top-actions">'
        . '<a class="icon-btn" href="' . h(app_url($bellHref)) . '" title="' . ($admin ? 'Documents awaiting review' : 'Notifications') . '">' . icon('bell')
