@@ -1,0 +1,5 @@
+# Block direct access to secrets, config, SQL and tests (Apache 2.4)
+<FilesMatch "^(\.env.*|.*\.sql|.*\.md|.*\.sh)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes
